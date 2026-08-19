@@ -235,15 +235,23 @@ function QuestionBlock({
 
 function ThankYou() {
   return (
-    <div className="reveal flex flex-col items-center py-14 text-center">
-      <span className="flex size-14 items-center justify-center rounded-full bg-primary">
-        <Check className="size-6 text-accent" />
-      </span>
-      <h1 className="font-display mt-6 text-3xl text-primary">Thank you</h1>
+    <div className="reveal flex flex-col items-center py-10 text-center">
+      <img
+        src={mascotBow.url}
+        alt="The Ambassador Seoul bird mascot bowing in thanks"
+        className="w-36"
+      />
+      <h1 className="font-display mt-4 text-3xl text-primary">Thank you</h1>
       <p className="mt-2 max-w-xs text-sm text-muted-foreground">
         Your feedback helps us make every stay at The Ambassador Seoul a little more
         memorable.
       </p>
+      <img
+        src={logotypeDark.url}
+        alt="The Ambassador Seoul, Pullman Hotels and Resorts"
+        className="mt-10 w-52 opacity-70"
+      />
     </div>
   );
 }
+
