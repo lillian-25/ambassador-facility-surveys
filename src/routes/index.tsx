@@ -71,7 +71,7 @@ function SurveyPage() {
             <img
               src={heroImage.url}
               alt="The Ambassador Seoul bird mascot raising a champagne glass on a rooftop terrace at night"
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover object-left"
             />
             <div className="veil absolute inset-0" />
           </div>
