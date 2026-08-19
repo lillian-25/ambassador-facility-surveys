@@ -32,8 +32,6 @@ export const Route = createFileRoute("/")({
   component: SurveyPage,
 });
 
-type Answers = Record<string, number | string>;
-
 function SurveyPage() {
   const [answers, setAnswers] = useState<Answers>({});
   const [submitted, setSubmitted] = useState(false);
@@ -48,17 +46,20 @@ function SurveyPage() {
     prevCount.current = path.length;
   }, [path.length]);
 
-  function answer(id: string, value: number | string) {
+  function answer(id: string, value: AnswerValue) {
     setAnswers((prev) => {
       const nextAnswers: Answers = { ...prev, [id]: value };
       // Drop answers that are no longer on the active path.
       const keep = new Set(buildPath(nextAnswers));
       keep.add(id);
       return Object.fromEntries(
-        Object.entries(nextAnswers).filter(([key]) => keep.has(key)),
+        Object.entries(nextAnswers).filter(
+          ([key]) => keep.has(key) || keep.has(key.replace("__comment", "")),
+        ),
       );
     });
   }
+
 
   const answered = path.filter((id) => answers[id] !== undefined).length;
   const progress = Math.min(100, Math.round((answered / (path.length + 1)) * 100));
