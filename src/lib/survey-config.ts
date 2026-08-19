@@ -3,7 +3,7 @@ export type ScaleQuestion = {
   kind: "scale";
   title: string;
   subtitle: string;
-  /** Given the rating (1-5), the id of the next question, or null to finish. */
+  comment?: string;
   next: (rating: number) => string | null;
 };
 
@@ -15,6 +15,17 @@ export type ChoiceQuestion = {
   options: { value: string; label: string; next: string | null }[];
 };
 
+export type MultiQuestion = {
+  id: string;
+  kind: "multi";
+  title: string;
+  subtitle: string;
+  options: string[];
+  noneLabel: string;
+  /** Branch on the set of selected facilities. */
+  next: (selected: string[]) => string | null;
+};
+
 export type TextQuestion = {
   id: string;
   kind: "text";
@@ -24,7 +35,12 @@ export type TextQuestion = {
   next: string | null;
 };
 
-export type Question = ScaleQuestion | ChoiceQuestion | TextQuestion;
+export type Question = ScaleQuestion | ChoiceQuestion | MultiQuestion | TextQuestion;
+
+/** Answers: scale -> number, choice -> string, multi -> string[], text -> string.
+ *  Comments are stored under `${questionId}__comment`. */
+export type AnswerValue = number | string | string[];
+export type Answers = Record<string, AnswerValue>;
 
 export const FIRST_QUESTION_ID = "overall";
 
@@ -34,88 +50,87 @@ export const questions: Record<string, Question> = {
     kind: "scale",
     title: "How did you enjoy your overall stay?",
     subtitle: "Scale from 1–5",
-    next: (r) => (r <= 3 ? "whatWentWrong" : "highlight"),
+    next: () => "stayType",
   },
-  whatWentWrong: {
-    id: "whatWentWrong",
+  stayType: {
+    id: "stayType",
     kind: "choice",
-    title: "We're sorry to hear that. What let you down most?",
+    title: "What best describes your stay?",
     subtitle: "Choose one",
     options: [
-      { value: "room", label: "The room", next: "roomRating" },
-      { value: "service", label: "Service & staff", next: "serviceRating" },
-      { value: "dining", label: "Dining", next: "diningRating" },
-      { value: "other", label: "Something else", next: "detail" },
+      { value: "leisure", label: "Leisure", next: "facilities" },
+      { value: "business", label: "Business", next: "facilities" },
+      { value: "repeat", label: "Repeat guest", next: "facilities" },
     ],
   },
-  highlight: {
-    id: "highlight",
-    kind: "choice",
-    title: "Wonderful. What stood out the most?",
-    subtitle: "Choose one",
+  facilities: {
+    id: "facilities",
+    kind: "multi",
+    title: "What facilities did you use?",
+    subtitle: "Select all that apply",
     options: [
-      { value: "room", label: "The room", next: "roomRating" },
-      { value: "service", label: "Service & staff", next: "serviceRating" },
-      { value: "dining", label: "Dining", next: "diningRating" },
-      { value: "view", label: "The view & setting", next: "recommend" },
+      "Fitness",
+      "Sauna",
+      "Indoor Swimming Pool",
+      "Urban escape",
+      "Cabana & nest bed",
+      "Screen golf",
+      "G.X / Yoga / Pilates",
+      "Club Ambassador Lounge",
+      "Business Center",
+      "Barber",
     ],
+    noneLabel: "I didn't use any facilities",
+    next: (selected) => (selected.length > 0 ? "facilityCleanliness" : "dining"),
   },
-  roomRating: {
-    id: "roomRating",
+  facilityCleanliness: {
+    id: "facilityCleanliness",
     kind: "scale",
-    title: "How would you rate the comfort of your room?",
+    title: "How was the cleanliness at these facilities?",
     subtitle: "Scale from 1–5",
-    next: (r) => (r <= 3 ? "housekeeping" : "recommend"),
+    comment: "Anything specific about cleanliness? (optional)",
+    next: () => "facilityStaff",
   },
-  housekeeping: {
-    id: "housekeeping",
+  facilityStaff: {
+    id: "facilityStaff",
     kind: "scale",
-    title: "And how was housekeeping during your stay?",
+    title: "How helpful, knowledgeable, and attentive were the staff?",
     subtitle: "Scale from 1–5",
-    next: () => "detail",
+    comment: "Tell us about the team (optional)",
+    next: () => "dining",
   },
-  serviceRating: {
-    id: "serviceRating",
+  dining: {
+    id: "dining",
+    kind: "multi",
+    title: "Which dining did you visit during your stay?",
+    subtitle: "Select all that apply",
+    options: ["Lobby buffet", "Haobin", "Lobby bar", "Pool-side bar"],
+    noneLabel: "I didn't dine with us",
+    next: (selected) => (selected.length > 0 ? "diningCleanliness" : "returnPrice"),
+  },
+  diningCleanliness: {
+    id: "diningCleanliness",
     kind: "scale",
-    title: "How attentive was our team?",
+    title: "How was the cleanliness at these venues?",
     subtitle: "Scale from 1–5",
-    next: (r) => (r <= 3 ? "checkin" : "recommend"),
+    comment: "Anything specific about cleanliness? (optional)",
+    next: () => "diningStaff",
   },
-  checkin: {
-    id: "checkin",
+  diningStaff: {
+    id: "diningStaff",
     kind: "scale",
-    title: "How smooth was check-in and check-out?",
+    title: "Were the staff helpful, knowledgeable, and attentive to your needs?",
     subtitle: "Scale from 1–5",
-    next: () => "detail",
+    comment: "Tell us about the dining team (optional)",
+    next: () => "returnPrice",
   },
-  diningRating: {
-    id: "diningRating",
-    kind: "scale",
-    title: "How did you enjoy dining with us?",
-    subtitle: "Scale from 1–5",
-    next: (r) => (r <= 3 ? "breakfast" : "recommend"),
-  },
-  breakfast: {
-    id: "breakfast",
-    kind: "scale",
-    title: "How was breakfast in particular?",
-    subtitle: "Scale from 1–5",
-    next: () => "detail",
-  },
-  recommend: {
-    id: "recommend",
-    kind: "scale",
-    title: "How likely are you to recommend us to a friend?",
-    subtitle: "Scale from 1–5",
-    next: (r) => (r >= 4 ? "returnStay" : "detail"),
-  },
-  returnStay: {
-    id: "returnStay",
+  returnPrice: {
+    id: "returnPrice",
     kind: "choice",
-    title: "Would you stay with us again?",
+    title: "Would you choose to stay with us again at a similar price point?",
     subtitle: "Choose one",
     options: [
-      { value: "yes", label: "Absolutely", next: "detail" },
+      { value: "yes", label: "Yes, absolutely", next: "detail" },
       { value: "maybe", label: "Perhaps", next: "detail" },
       { value: "no", label: "Unlikely", next: "detail" },
     ],
@@ -130,19 +145,28 @@ export const questions: Record<string, Question> = {
   },
 };
 
-export function buildPath(answers: Record<string, number | string>): string[] {
+function isAnswered(q: Question, value: AnswerValue | undefined): boolean {
+  if (value === undefined) return false;
+  if (q.kind === "multi") return Array.isArray(value);
+  if (q.kind === "text") return true;
+  return value !== "";
+}
+
+export function buildPath(answers: Answers): string[] {
   const path: string[] = [];
   let current: string | null = FIRST_QUESTION_ID;
   while (current) {
     path.push(current);
     const q: Question | undefined = questions[current];
     if (!q) break;
-    const answer: number | string | undefined = answers[current];
-    if (answer === undefined || answer === "") break;
+    const value: AnswerValue | undefined = answers[current];
+    if (!isAnswered(q, value)) break;
     if (q.kind === "scale") {
-      current = q.next(answer as number);
+      current = q.next(value as number);
     } else if (q.kind === "choice") {
-      current = q.options.find((o) => o.value === answer)?.next ?? null;
+      current = q.options.find((o) => o.value === value)?.next ?? null;
+    } else if (q.kind === "multi") {
+      current = q.next(value as string[]);
     } else {
       current = q.next;
     }
@@ -150,13 +174,11 @@ export function buildPath(answers: Record<string, number | string>): string[] {
   return path;
 }
 
-export function isComplete(answers: Record<string, number | string>): boolean {
+export function isComplete(answers: Answers): boolean {
   const path = buildPath(answers);
   const last = path[path.length - 1];
   if (!last) return false;
   const q = questions[last];
   if (!q) return false;
-  if (q.kind === "text") return true;
-  return answers[last] !== undefined;
+  return q.kind === "text" || isAnswered(q, answers[last]);
 }
-

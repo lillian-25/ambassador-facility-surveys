@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
-import heroImage from "@/assets/hotel-hero.jpg";
+import heroImage from "@/assets/hero-mascot.png.asset.json";
+import mascotBow from "@/assets/mascot-bow.png.asset.json";
+import logoSignature from "@/assets/logo-signature-ivory.png.asset.json";
+import logotypeDark from "@/assets/logotype-dark.png.asset.json";
 import {
   buildPath,
   isComplete,
@@ -29,8 +32,6 @@ export const Route = createFileRoute("/")({
   component: SurveyPage,
 });
 
-type Answers = Record<string, number | string>;
-
 function SurveyPage() {
   const [answers, setAnswers] = useState<Answers>({});
   const [submitted, setSubmitted] = useState(false);
@@ -45,17 +46,20 @@ function SurveyPage() {
     prevCount.current = path.length;
   }, [path.length]);
 
-  function answer(id: string, value: number | string) {
+  function answer(id: string, value: AnswerValue) {
     setAnswers((prev) => {
       const nextAnswers: Answers = { ...prev, [id]: value };
       // Drop answers that are no longer on the active path.
       const keep = new Set(buildPath(nextAnswers));
       keep.add(id);
       return Object.fromEntries(
-        Object.entries(nextAnswers).filter(([key]) => keep.has(key)),
+        Object.entries(nextAnswers).filter(
+          ([key]) => keep.has(key) || keep.has(key.replace("__comment", "")),
+        ),
       );
     });
   }
+
 
   const answered = path.filter((id) => answers[id] !== undefined).length;
   const progress = Math.min(100, Math.round((answered / (path.length + 1)) * 100));
@@ -63,24 +67,26 @@ function SurveyPage() {
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto w-full max-w-md">
-        <header className="relative h-[42vh] min-h-64 w-full overflow-hidden">
-          <img
-            src={heroImage}
-            alt="Rooftop terrace dining at dusk overlooking the city"
-            width={1024}
-            height={768}
-            className="h-full w-full object-cover"
-          />
-          <div className="veil absolute inset-0" />
-          <div className="absolute inset-x-0 top-10 flex flex-col items-center gap-1 px-6 text-center">
-            <span className="font-display text-3xl tracking-[0.18em] text-gold">
-              THE AMBASSADOR
-            </span>
-            <span className="text-[0.6rem] tracking-[0.5em] text-gold-soft">SEOUL</span>
+        <header className="relative h-[46vh] min-h-72 w-full">
+          <div className="absolute inset-0 overflow-hidden">
+            <img
+              src={heroImage.url}
+              alt="The Ambassador Seoul bird mascot raising a champagne glass on a rooftop terrace at night"
+              className="h-full w-full object-cover object-left"
+            />
+            <div className="veil absolute inset-0" />
           </div>
+          <img
+            src={logoSignature.url}
+            alt="The Ambassador Seoul, Pullman Hotels and Resorts"
+            className="absolute inset-x-0 top-6 mx-auto w-36 opacity-95"
+          />
         </header>
 
+
+
         <div className="relative -mt-10 rounded-t-[2rem] bg-card px-5 pb-16 pt-8 text-card-foreground shadow-card">
+
           {submitted ? (
             <ThankYou />
           ) : (
@@ -226,15 +232,23 @@ function QuestionBlock({
 
 function ThankYou() {
   return (
-    <div className="reveal flex flex-col items-center py-14 text-center">
-      <span className="flex size-14 items-center justify-center rounded-full bg-primary">
-        <Check className="size-6 text-accent" />
-      </span>
-      <h1 className="font-display mt-6 text-3xl text-primary">Thank you</h1>
+    <div className="reveal flex flex-col items-center py-10 text-center">
+      <img
+        src={mascotBow.url}
+        alt="The Ambassador Seoul bird mascot bowing in thanks"
+        className="w-36"
+      />
+      <h1 className="font-display mt-4 text-3xl text-primary">Thank you</h1>
       <p className="mt-2 max-w-xs text-sm text-muted-foreground">
         Your feedback helps us make every stay at The Ambassador Seoul a little more
         memorable.
       </p>
+      <img
+        src={logotypeDark.url}
+        alt="The Ambassador Seoul, Pullman Hotels and Resorts"
+        className="mt-10 w-52 opacity-70"
+      />
     </div>
   );
 }
+
