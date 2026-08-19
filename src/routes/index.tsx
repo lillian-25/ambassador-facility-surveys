@@ -82,7 +82,7 @@ function SurveyPage() {
           />
         </header>
 
-        </header>
+
 
         <div className="relative -mt-10 rounded-t-[2rem] bg-card px-5 pb-16 pt-8 text-card-foreground shadow-card">
 
