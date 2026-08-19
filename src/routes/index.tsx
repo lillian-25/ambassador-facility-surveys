@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
-import heroImage from "@/assets/hotel-hero.jpg";
-import mascotWave from "@/assets/mascot-wave.png.asset.json";
+import heroImage from "@/assets/hero-mascot.png.asset.json";
 import mascotBow from "@/assets/mascot-bow.png.asset.json";
 import logoSignature from "@/assets/logo-signature-ivory.png.asset.json";
 import logotypeDark from "@/assets/logotype-dark.png.asset.json";
