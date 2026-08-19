@@ -135,8 +135,9 @@ export function buildPath(answers: Record<string, number | string>): string[] {
   let current: string | null = FIRST_QUESTION_ID;
   while (current) {
     path.push(current);
-    const q = questions[current];
-    const answer = answers[current];
+    const q: Question | undefined = questions[current];
+    if (!q) break;
+    const answer: number | string | undefined = answers[current];
     if (answer === undefined || answer === "") break;
     if (q.kind === "scale") {
       current = q.next(answer as number);
@@ -152,7 +153,10 @@ export function buildPath(answers: Record<string, number | string>): string[] {
 export function isComplete(answers: Record<string, number | string>): boolean {
   const path = buildPath(answers);
   const last = path[path.length - 1];
+  if (!last) return false;
   const q = questions[last];
+  if (!q) return false;
   if (q.kind === "text") return true;
   return answers[last] !== undefined;
 }
+
