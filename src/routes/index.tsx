@@ -69,10 +69,8 @@ function SurveyPage() {
         <header className="relative h-[46vh] min-h-72 w-full">
           <div className="absolute inset-0 overflow-hidden">
             <img
-              src={heroImage}
-              alt="Rooftop terrace dining at dusk overlooking the city"
-              width={1024}
-              height={768}
+              src={heroImage.url}
+              alt="The Ambassador Seoul bird mascot raising a champagne glass on a rooftop terrace at night"
               className="h-full w-full object-cover"
             />
             <div className="veil absolute inset-0" />
@@ -80,13 +78,10 @@ function SurveyPage() {
           <img
             src={logoSignature.url}
             alt="The Ambassador Seoul, Pullman Hotels and Resorts"
-            className="absolute inset-x-0 top-7 mx-auto w-40 opacity-95"
+            className="absolute inset-x-0 top-6 mx-auto w-36 opacity-95"
           />
-          <img
-            src={mascotWave.url}
-            alt="The Ambassador Seoul bird mascot"
-            className="absolute -bottom-4 left-5 z-10 w-28 drop-shadow-[0_14px_24px_rgba(0,0,0,0.5)]"
-          />
+        </header>
+
         </header>
 
         <div className="relative -mt-10 rounded-t-[2rem] bg-card px-5 pb-16 pt-8 text-card-foreground shadow-card">
