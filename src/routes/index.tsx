@@ -2,6 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
 import heroImage from "@/assets/hotel-hero.jpg";
+import mascotWave from "@/assets/mascot-wave.png.asset.json";
+import mascotBow from "@/assets/mascot-bow.png.asset.json";
+import logoSignature from "@/assets/logo-signature-ivory.png.asset.json";
+import logotypeDark from "@/assets/logotype-dark.png.asset.json";
 import {
   buildPath,
   isComplete,
@@ -63,7 +67,7 @@ function SurveyPage() {
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto w-full max-w-md">
-        <header className="relative h-[42vh] min-h-64 w-full overflow-hidden">
+        <header className="relative h-[46vh] min-h-72 w-full overflow-hidden">
           <img
             src={heroImage}
             alt="Rooftop terrace dining at dusk overlooking the city"
@@ -72,13 +76,18 @@ function SurveyPage() {
             className="h-full w-full object-cover"
           />
           <div className="veil absolute inset-0" />
-          <div className="absolute inset-x-0 top-10 flex flex-col items-center gap-1 px-6 text-center">
-            <span className="font-display text-3xl tracking-[0.18em] text-gold">
-              THE AMBASSADOR
-            </span>
-            <span className="text-[0.6rem] tracking-[0.5em] text-gold-soft">SEOUL</span>
-          </div>
+          <img
+            src={logoSignature.url}
+            alt="The Ambassador Seoul, Pullman Hotels and Resorts"
+            className="absolute inset-x-0 top-7 mx-auto w-40 opacity-95"
+          />
+          <img
+            src={mascotWave.url}
+            alt="The Ambassador Seoul bird mascot"
+            className="absolute bottom-0 left-4 w-32 drop-shadow-[0_10px_24px_rgba(0,0,0,0.45)]"
+          />
         </header>
+
 
         <div className="relative -mt-10 rounded-t-[2rem] bg-card px-5 pb-16 pt-8 text-card-foreground shadow-card">
           {submitted ? (
