@@ -9,6 +9,8 @@ import {
   buildPath,
   isComplete,
   questions,
+  type AnswerValue,
+  type Answers,
   type Question,
 } from "@/lib/survey-config";
 
