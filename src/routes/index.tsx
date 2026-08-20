@@ -151,13 +151,26 @@ function QuestionBlock({
   question,
   index,
   value,
+  comment,
   onAnswer,
+  onComment,
 }: {
   question: Question;
   index: number;
-  value: number | string | undefined;
-  onAnswer: (value: number | string) => void;
+  value: AnswerValue | undefined;
+  comment: AnswerValue | undefined;
+  onAnswer: (value: AnswerValue) => void;
+  onComment: (value: string) => void;
 }) {
+  const selectedList = Array.isArray(value) ? value : [];
+  function toggle(option: string) {
+    onAnswer(
+      selectedList.includes(option)
+        ? selectedList.filter((item) => item !== option)
+        : [...selectedList, option],
+    );
+  }
+
   return (
     <fieldset className="border-0 p-0">
       <legend className="w-full">
