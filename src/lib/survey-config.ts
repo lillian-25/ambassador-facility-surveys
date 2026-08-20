@@ -4,6 +4,11 @@ export type ScaleQuestion = {
   title: string;
   subtitle: string;
   comment?: string;
+  reactions?: {
+    low?: string;
+    high?: string;
+    neutral?: string;
+  };
   next: (rating: number) => string | null;
 };
 
