@@ -211,6 +211,53 @@ function QuestionBlock({
         </div>
       )}
 
+      {question.kind === "scale" && question.comment && value !== undefined && (
+        <textarea
+          rows={2}
+          value={typeof comment === "string" ? comment : ""}
+          placeholder={question.comment}
+          onChange={(event) => onComment(event.target.value)}
+          className="surface-sand mt-2 w-full resize-none rounded-2xl p-3 text-sm text-secondary-foreground outline-none placeholder:text-secondary-foreground/45 focus:ring-2 focus:ring-ring"
+        />
+      )}
+
+      {question.kind === "multi" && (
+        <div className="mt-3 space-y-2">
+          {question.options.map((option) => {
+            const selected = selectedList.includes(option);
+            return (
+              <button
+                key={option}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => toggle(option)}
+                className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-sm transition-colors ${
+                  selected
+                    ? "bg-primary text-primary-foreground"
+                    : "surface-sand text-secondary-foreground"
+                }`}
+              >
+                {option}
+                {selected && <Check className="size-4 text-accent" />}
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => onAnswer([])}
+            className={`w-full rounded-2xl px-4 py-3 text-left text-sm transition-colors ${
+              Array.isArray(value) && value.length === 0
+                ? "bg-primary text-primary-foreground"
+                : "border border-secondary-foreground/20 text-muted-foreground"
+            }`}
+          >
+            {question.noneLabel}
+          </button>
+        </div>
+      )}
+
+
+
       {question.kind === "choice" && (
         <div className="mt-3 space-y-2">
           {question.options.map((option) => {
