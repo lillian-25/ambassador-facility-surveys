@@ -42,26 +42,26 @@ export type Question = ScaleQuestion | ChoiceQuestion | MultiQuestion | TextQues
 export type AnswerValue = number | string | string[];
 export type Answers = Record<string, AnswerValue>;
 
-export const FIRST_QUESTION_ID = "overall";
+export const FIRST_QUESTION_ID = "stayType";
 
 export const questions: Record<string, Question> = {
-  overall: {
-    id: "overall",
-    kind: "scale",
-    title: "How did you enjoy your overall stay?",
-    subtitle: "Scale from 1–5",
-    next: () => "stayType",
-  },
   stayType: {
     id: "stayType",
     kind: "choice",
     title: "What best describes your stay?",
     subtitle: "Choose one",
     options: [
-      { value: "leisure", label: "Leisure", next: "facilities" },
-      { value: "business", label: "Business", next: "facilities" },
-      { value: "repeat", label: "Repeat guest", next: "facilities" },
+      { value: "leisure", label: "Leisure", next: "overall" },
+      { value: "business", label: "Business", next: "overall" },
+      { value: "repeat", label: "Repeat guest", next: "overall" },
     ],
+  },
+  overall: {
+    id: "overall",
+    kind: "scale",
+    title: "How did you enjoy your overall stay?",
+    subtitle: "Scale from 1–5",
+    next: () => "facilities",
   },
   facilities: {
     id: "facilities",
