@@ -211,6 +211,16 @@ function QuestionBlock({
         </div>
       )}
 
+      {question.kind === "scale" && question.reactions && typeof value === "number" && (
+        <p className="mt-2 text-center text-sm font-medium text-accent-foreground/80">
+          {value <= 2
+            ? question.reactions.low
+            : value >= 4
+              ? question.reactions.high
+              : question.reactions.neutral}
+        </p>
+      )}
+
       {question.kind === "scale" && question.comment && value !== undefined && (
         <textarea
           rows={2}

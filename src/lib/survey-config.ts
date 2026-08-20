@@ -4,6 +4,11 @@ export type ScaleQuestion = {
   title: string;
   subtitle: string;
   comment?: string;
+  reactions?: {
+    low?: string;
+    high?: string;
+    neutral?: string;
+  };
   next: (rating: number) => string | null;
 };
 
@@ -61,6 +66,11 @@ export const questions: Record<string, Question> = {
     kind: "scale",
     title: "How did you enjoy your overall stay?",
     subtitle: "Scale from 1–5",
+    reactions: {
+      low: "Oh no, so sorry to hear that.",
+      neutral: "Thank you for sharing.",
+      high: "Wonderful, lovely.",
+    },
     next: () => "facilities",
   },
   facilities: {
