@@ -119,8 +119,11 @@ function SurveyPage() {
                         question={question}
                         index={index}
                         value={answers[id]}
+                        comment={answers[`${id}__comment`]}
                         onAnswer={(value) => answer(id, value)}
+                        onComment={(value) => answer(`${id}__comment`, value)}
                       />
+
                     </div>
                   );
                 })}
