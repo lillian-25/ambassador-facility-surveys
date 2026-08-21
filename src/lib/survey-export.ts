@@ -33,7 +33,6 @@ export function exportResponses(rows: SurveyResponse[], filters: Filters) {
   const sheet = XLSX.utils.aoa_to_sheet(aoa);
   sheet["!cols"] = COLUMNS.map((c) => ({ wch: c.width }));
   const headerRow = filtered ? 2 : 0;
-  sheet["!freeze"] = undefined;
   sheet["!autofilter"] = {
     ref: XLSX.utils.encode_range({
       s: { r: headerRow, c: 0 },
