@@ -16,8 +16,13 @@ function makeRandom(seed: number) {
   };
 }
 
-const FACILITIES = questions.facilities.kind === "multi" ? questions.facilities.options : [];
-const DINING = questions.dining.kind === "multi" ? questions.dining.options : [];
+function multiOptions(id: string): string[] {
+  const q = questions[id];
+  return q && q.kind === "multi" ? q.options : [];
+}
+
+const FACILITIES = multiOptions("facilities");
+const DINING = multiOptions("dining");
 
 const CLEAN_COMMENTS = [
   "Sauna floor was slippery and towels ran out mid-morning.",
@@ -44,7 +49,7 @@ const DETAILS = [
   "Air conditioning in the room was noisy overnight.",
 ];
 
-function pickSome<T>(list: T[], rnd: () => number, chance: number): T[] {
+function pickSome(list: string[], rnd: () => number, chance: number): string[] {
   return list.filter(() => rnd() < chance);
 }
 
@@ -64,29 +69,29 @@ export function generateResponses(count = 180, seed = 20260819): SurveyResponse[
     const scale = (base: number) =>
       Math.max(1, Math.min(5, Math.round(base + bias + (rnd() * 2 - 1) * 1.3)));
 
-    answers.overall = scale(3.9);
+    answers['overall'] = scale(3.9);
 
     const facilities = pickSome(FACILITIES, rnd, 0.22);
-    answers.facilities = facilities;
+    answers['facilities'] = facilities;
     if (facilities.length > 0) {
-      answers.facilityCleanliness = scale(3.5);
-      answers.facilityStaff = scale(3.8);
-      if (rnd() < 0.4) answers.facilityCleanliness__comment = CLEAN_COMMENTS[Math.floor(rnd() * CLEAN_COMMENTS.length)]!;
-      if (rnd() < 0.35) answers.facilityStaff__comment = STAFF_COMMENTS[Math.floor(rnd() * STAFF_COMMENTS.length)]!;
+      answers['facilityCleanliness'] = scale(3.5);
+      answers['facilityStaff'] = scale(3.8);
+      if (rnd() < 0.4) answers['facilityCleanliness']__comment = CLEAN_COMMENTS[Math.floor(rnd() * CLEAN_COMMENTS.length)]!;
+      if (rnd() < 0.35) answers['facilityStaff']__comment = STAFF_COMMENTS[Math.floor(rnd() * STAFF_COMMENTS.length)]!;
     }
 
     const dining = pickSome(DINING, rnd, 0.42);
-    answers.dining = dining;
+    answers['dining'] = dining;
     if (dining.length > 0) {
-      answers.diningCleanliness = scale(3.7);
-      answers.diningStaff = scale(3.6);
-      if (rnd() < 0.35) answers.diningCleanliness__comment = CLEAN_COMMENTS[Math.floor(rnd() * CLEAN_COMMENTS.length)]!;
-      if (rnd() < 0.3) answers.diningStaff__comment = STAFF_COMMENTS[Math.floor(rnd() * STAFF_COMMENTS.length)]!;
+      answers['dining']Cleanliness = scale(3.7);
+      answers['dining']Staff = scale(3.6);
+      if (rnd() < 0.35) answers['dining']Cleanliness__comment = CLEAN_COMMENTS[Math.floor(rnd() * CLEAN_COMMENTS.length)]!;
+      if (rnd() < 0.3) answers['dining']Staff__comment = STAFF_COMMENTS[Math.floor(rnd() * STAFF_COMMENTS.length)]!;
     }
 
-    const overall = answers.overall as number;
-    answers.returnPrice = overall >= 4 ? "yes" : overall === 3 ? "maybe" : rnd() < 0.6 ? "no" : "maybe";
-    if (rnd() < 0.5) answers.detail = DETAILS[Math.floor(rnd() * DETAILS.length)]!;
+    const overall = answers['overall'] as number;
+    answers['returnPrice'] = overall >= 4 ? "yes" : overall === 3 ? "maybe" : rnd() < 0.6 ? "no" : "maybe";
+    if (rnd() < 0.5) answers['detail'] = DETAILS[Math.floor(rnd() * DETAILS.length)]!;
 
     out.push({
       id: `AMB-${(10000 + i).toString()}`,
