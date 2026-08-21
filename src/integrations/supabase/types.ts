@@ -14,7 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      department_weights: {
+        Row: {
+          department: string
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          department: string
+          updated_at?: string
+          weight?: number
+        }
+        Update: {
+          department?: string
+          updated_at?: string
+          weight?: number
+        }
+        Relationships: []
+      }
+      survey_responses: {
+        Row: {
+          comment: string | null
+          created_at: string
+          department: string
+          facility: string
+          id: string
+          question_id: string
+          question_text: string
+          rating: number | null
+          response: string | null
+          response_id: string
+          sentiment: string | null
+          survey_type: string
+          touchpoint: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          department: string
+          facility: string
+          id?: string
+          question_id: string
+          question_text: string
+          rating?: number | null
+          response?: string | null
+          response_id: string
+          sentiment?: string | null
+          survey_type: string
+          touchpoint: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          department?: string
+          facility?: string
+          id?: string
+          question_id?: string
+          question_text?: string
+          rating?: number | null
+          response?: string | null
+          response_id?: string
+          sentiment?: string | null
+          survey_type?: string
+          touchpoint?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
