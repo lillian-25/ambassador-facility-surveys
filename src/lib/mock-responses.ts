@@ -76,17 +76,17 @@ export function generateResponses(count = 180, seed = 20260819): SurveyResponse[
     if (facilities.length > 0) {
       answers['facilityCleanliness'] = scale(3.5);
       answers['facilityStaff'] = scale(3.8);
-      if (rnd() < 0.4) answers['facilityCleanliness']__comment = CLEAN_COMMENTS[Math.floor(rnd() * CLEAN_COMMENTS.length)]!;
-      if (rnd() < 0.35) answers['facilityStaff']__comment = STAFF_COMMENTS[Math.floor(rnd() * STAFF_COMMENTS.length)]!;
+      if (rnd() < 0.4) answers['facilityCleanliness__comment'] = CLEAN_COMMENTS[Math.floor(rnd() * CLEAN_COMMENTS.length)]!;
+      if (rnd() < 0.35) answers['facilityStaff__comment'] = STAFF_COMMENTS[Math.floor(rnd() * STAFF_COMMENTS.length)]!;
     }
 
     const dining = pickSome(DINING, rnd, 0.42);
     answers['dining'] = dining;
     if (dining.length > 0) {
-      answers['dining']Cleanliness = scale(3.7);
-      answers['dining']Staff = scale(3.6);
-      if (rnd() < 0.35) answers['dining']Cleanliness__comment = CLEAN_COMMENTS[Math.floor(rnd() * CLEAN_COMMENTS.length)]!;
-      if (rnd() < 0.3) answers['dining']Staff__comment = STAFF_COMMENTS[Math.floor(rnd() * STAFF_COMMENTS.length)]!;
+      answers['diningCleanliness'] = scale(3.7);
+      answers['diningStaff'] = scale(3.6);
+      if (rnd() < 0.35) answers['diningCleanliness__comment'] = CLEAN_COMMENTS[Math.floor(rnd() * CLEAN_COMMENTS.length)]!;
+      if (rnd() < 0.3) answers['diningStaff__comment'] = STAFF_COMMENTS[Math.floor(rnd() * STAFF_COMMENTS.length)]!;
     }
 
     const overall = answers['overall'] as number;
