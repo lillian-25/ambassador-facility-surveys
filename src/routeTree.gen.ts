@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as PostCheckoutRouteImport } from './routes/post-checkout'
+import { Route as SFacilityRouteImport } from './routes/s.$facility'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +24,49 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PostCheckoutRoute = PostCheckoutRouteImport.update({
+  id: '/post-checkout',
+  path: '/post-checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SFacilityRoute = SFacilityRouteImport.update({
+  id: '/s/$facility',
+  path: '/s/$facility',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/post-checkout': typeof PostCheckoutRoute
+  '/s/$facility': typeof SFacilityRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/post-checkout': typeof PostCheckoutRoute
+  '/s/$facility': typeof SFacilityRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/post-checkout': typeof PostCheckoutRoute
+  '/s/$facility': typeof SFacilityRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard'
+  fullPaths: '/' | '/dashboard' | '/post-checkout' | '/s/$facility'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard'
-  id: '__root__' | '/' | '/dashboard'
+  to: '/' | '/dashboard' | '/post-checkout' | '/s/$facility'
+  id: '__root__' | '/' | '/dashboard' | '/post-checkout' | '/s/$facility'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
+  PostCheckoutRoute: typeof PostCheckoutRoute
+  SFacilityRoute: typeof SFacilityRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +85,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/post-checkout': {
+      id: '/post-checkout'
+      path: '/post-checkout'
+      fullPath: '/post-checkout'
+      preLoaderRoute: typeof PostCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/s/$facility': {
+      id: '/s/$facility'
+      path: '/s/$facility'
+      fullPath: '/s/$facility'
+      preLoaderRoute: typeof SFacilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
+  PostCheckoutRoute: PostCheckoutRoute,
+  SFacilityRoute: SFacilityRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
