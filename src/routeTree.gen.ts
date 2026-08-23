@@ -10,7 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as PostCheckoutRouteImport } from './routes/post-checkout'
 import { Route as SFacilityRouteImport } from './routes/s.$facility'
 
@@ -19,9 +19,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PostCheckoutRoute = PostCheckoutRouteImport.update({
@@ -37,34 +37,34 @@ const SFacilityRoute = SFacilityRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/admin': typeof AdminRoute
   '/post-checkout': typeof PostCheckoutRoute
   '/s/$facility': typeof SFacilityRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/admin': typeof AdminRoute
   '/post-checkout': typeof PostCheckoutRoute
   '/s/$facility': typeof SFacilityRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/admin': typeof AdminRoute
   '/post-checkout': typeof PostCheckoutRoute
   '/s/$facility': typeof SFacilityRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/post-checkout' | '/s/$facility'
+  fullPaths: '/' | '/admin' | '/post-checkout' | '/s/$facility'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/post-checkout' | '/s/$facility'
-  id: '__root__' | '/' | '/dashboard' | '/post-checkout' | '/s/$facility'
+  to: '/' | '/admin' | '/post-checkout' | '/s/$facility'
+  id: '__root__' | '/' | '/admin' | '/post-checkout' | '/s/$facility'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DashboardRoute: typeof DashboardRoute
+  AdminRoute: typeof AdminRoute
   PostCheckoutRoute: typeof PostCheckoutRoute
   SFacilityRoute: typeof SFacilityRoute
 }
@@ -78,11 +78,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/post-checkout': {
@@ -104,7 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DashboardRoute: DashboardRoute,
+  AdminRoute: AdminRoute,
   PostCheckoutRoute: PostCheckoutRoute,
   SFacilityRoute: SFacilityRoute,
 }

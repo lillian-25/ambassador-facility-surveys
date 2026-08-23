@@ -1,329 +1,108 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { Check } from "lucide-react";
-import heroImage from "@/assets/hero-mascot.png.asset.json";
-import mascotBow from "@/assets/mascot-bow.png.asset.json";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import logoSignature from "@/assets/logo-signature-ivory.png.asset.json";
-import logotypeDark from "@/assets/logotype-dark.png.asset.json";
-import {
-  buildPath,
-  isComplete,
-  questions,
-  type AnswerValue,
-  type Answers,
-  type Question,
-} from "@/lib/survey-config";
+import heroImage from "@/assets/hero-mascot.png.asset.json";
+import { FACILITIES, PRIVACY_STATEMENT } from "@/lib/survey-schema";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Guest Experience Survey | The Ambassador Seoul" },
+      { title: "Guest Feedback | Ambassador Hotel" },
       {
         name: "description",
         content:
-          "Share how your stay went at The Ambassador Seoul. A short, guided survey that adapts to your answers.",
+          "Share your experience at Ambassador Hotel. Scan the QR code at any facility or restaurant, or complete our short post-stay survey.",
       },
-      { property: "og:title", content: "Guest Experience Survey | The Ambassador Seoul" },
+      { property: "og:title", content: "Guest Feedback | Ambassador Hotel" },
       {
         property: "og:description",
         content:
-          "Share how your stay went at The Ambassador Seoul. A short, guided survey that adapts to your answers.",
+          "Short, anonymous surveys for every Ambassador Hotel facility, restaurant and bar, plus our post-stay survey.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: SurveyPage,
+  component: Hub,
 });
 
-function SurveyPage() {
-  const [answers, setAnswers] = useState<Answers>({});
-  const [submitted, setSubmitted] = useState(false);
-  const path = buildPath(answers);
-  const endRef = useRef<HTMLDivElement>(null);
-  const prevCount = useRef(path.length);
-
-  useEffect(() => {
-    if (path.length > prevCount.current) {
-      endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-    }
-    prevCount.current = path.length;
-  }, [path.length]);
-
-  function answer(id: string, value: AnswerValue) {
-    setAnswers((prev) => {
-      const nextAnswers: Answers = { ...prev, [id]: value };
-      // Drop answers that are no longer on the active path.
-      const keep = new Set(buildPath(nextAnswers));
-      keep.add(id);
-      return Object.fromEntries(
-        Object.entries(nextAnswers).filter(
-          ([key]) => keep.has(key) || keep.has(key.replace("__comment", "")),
-        ),
-      );
-    });
-  }
-
-
-  const answered = path.filter((id) => answers[id] !== undefined).length;
-  const progress = Math.min(100, Math.round((answered / (path.length + 1)) * 100));
+function Hub() {
+  const dining = FACILITIES.filter((f) => f.touchpoint === "Dining");
+  const others = FACILITIES.filter((f) => f.touchpoint !== "Dining");
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="mx-auto w-full max-w-md">
-        <header className="relative h-[46vh] min-h-72 w-full">
-          <div className="absolute inset-0 overflow-hidden">
-            <img
-              src={heroImage.url}
-              alt="The Ambassador Seoul bird mascot raising a champagne glass on a rooftop terrace at night"
-              className="h-full w-full object-cover object-left"
-            />
-            <div className="veil absolute inset-0" />
-          </div>
-          <img
-            src={logoSignature.url}
-            alt="The Ambassador Seoul, Pullman Hotels and Resorts"
-            className="absolute inset-x-0 top-6 mx-auto w-36 opacity-95"
-          />
-        </header>
+      <header className="relative isolate overflow-hidden px-6 pb-12 pt-10 text-center">
+        <img
+          src={heroImage.url}
+          alt=""
+          className="absolute inset-0 -z-10 h-full w-full object-cover object-left opacity-40"
+        />
+        <div className="veil absolute inset-0 -z-10" />
+        <img src={logoSignature.url} alt="Ambassador Hotel" className="mx-auto h-24 w-auto" />
+        <h1 className="font-display mt-6 text-3xl leading-tight text-foreground">
+          Voice of the Guest
+        </h1>
+        <p className="mx-auto mt-3 max-w-sm text-[0.9rem] leading-relaxed text-foreground/75">
+          Choose a survey below, or simply scan the QR code displayed at the facility you visited.
+        </p>
+      </header>
 
+      <section className="shadow-card rounded-t-[2rem] bg-card px-5 pb-16 pt-8 text-card-foreground">
+        <Link
+          to="/post-checkout"
+          className="block rounded-2xl bg-primary px-5 py-5 text-primary-foreground"
+        >
+          <p className="text-[0.68rem] uppercase tracking-[0.24em] text-accent">Post-stay</p>
+          <p className="font-display mt-1 text-2xl">Tell us about your stay</p>
+          <p className="mt-1 text-[0.85rem] opacity-80">
+            Four questions — enter the September Lucky Draw.
+          </p>
+        </Link>
 
-
-        <div className="relative -mt-10 rounded-t-[2rem] bg-card px-5 pb-16 pt-8 text-card-foreground shadow-card">
-
-          {submitted ? (
-            <ThankYou />
-          ) : (
-            <>
-              <div className="mb-7">
-                <h1 className="font-display text-2xl leading-snug text-primary">
-                  How was your stay?
-                </h1>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Each question unfolds based on your last answer — it takes about a
-                  minute.
-                </p>
-                <div className="mt-4 h-1 w-full overflow-hidden rounded-full bg-secondary">
-                  <div
-                    className="h-full rounded-full bg-accent transition-all duration-500"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-7">
-                {path.map((id, index) => {
-                  const question = questions[id];
-                  if (!question) return null;
-                  return (
-                    <div key={id} className="reveal">
-                      <QuestionBlock
-                        question={question}
-                        index={index}
-                        value={answers[id]}
-                        comment={answers[`${id}__comment`]}
-                        onAnswer={(value) => answer(id, value)}
-                        onComment={(value) => answer(`${id}__comment`, value)}
-                      />
-
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div ref={endRef} className="pt-9">
-                <button
-                  type="button"
-                  disabled={!isComplete(answers)}
-                  onClick={() => setSubmitted(true)}
-                  className="w-full rounded-full bg-primary px-6 py-4 text-sm font-semibold tracking-[0.14em] text-primary-foreground shadow-soft transition-opacity disabled:opacity-40"
-                >
-                  SUBMIT
-                </button>
-              </div>
-            </>
-          )}
+        <h2 className="font-display mt-10 text-xl">Facilities & wellness</h2>
+        <div className="mt-4 space-y-2">
+          {others.map((f) => (
+            <Link
+              key={f.slug}
+              to="/s/$facility"
+              params={{ facility: f.slug }}
+              className="surface-sand flex items-center justify-between rounded-2xl px-4 py-3.5"
+            >
+              <span className="text-[0.95rem] text-card-foreground">{f.name}</span>
+              <span className="text-[0.68rem] uppercase tracking-[0.16em] text-muted-foreground">
+                {f.touchpoint}
+              </span>
+            </Link>
+          ))}
         </div>
-      </div>
+
+        <h2 className="font-display mt-10 text-xl">Dining & bars</h2>
+        <div className="mt-4 space-y-2">
+          {dining.map((f) => (
+            <Link
+              key={f.slug}
+              to="/s/$facility"
+              params={{ facility: f.slug }}
+              className="surface-sand flex items-center justify-between rounded-2xl px-4 py-3.5"
+            >
+              <span className="text-[0.95rem] text-card-foreground">{f.name}</span>
+              <span className="text-[0.68rem] uppercase tracking-[0.16em] text-muted-foreground">
+                Dining
+              </span>
+            </Link>
+          ))}
+        </div>
+
+        <p className="mt-10 text-[0.72rem] leading-relaxed text-muted-foreground">
+          {PRIVACY_STATEMENT}
+        </p>
+        <Link
+          to="/admin"
+          className="mt-6 inline-block text-[0.68rem] uppercase tracking-[0.2em] text-muted-foreground underline"
+        >
+          Staff dashboard
+        </Link>
+      </section>
     </main>
   );
 }
-
-function QuestionBlock({
-  question,
-  index,
-  value,
-  comment,
-  onAnswer,
-  onComment,
-}: {
-  question: Question;
-  index: number;
-  value: AnswerValue | undefined;
-  comment: AnswerValue | undefined;
-  onAnswer: (value: AnswerValue) => void;
-  onComment: (value: string) => void;
-}) {
-  const selectedList = Array.isArray(value) ? value : [];
-  function toggle(option: string) {
-    onAnswer(
-      selectedList.includes(option)
-        ? selectedList.filter((item) => item !== option)
-        : [...selectedList, option],
-    );
-  }
-
-  return (
-    <fieldset className="border-0 p-0">
-      <legend className="w-full">
-        <span className="text-[0.65rem] font-semibold tracking-[0.3em] text-accent-foreground/50">
-          {String(index + 1).padStart(2, "0")}
-        </span>
-        <p className="mt-1 text-base font-semibold leading-snug text-card-foreground">
-          {question.title}
-        </p>
-        <p className="text-xs text-muted-foreground">{question.subtitle}</p>
-      </legend>
-
-      {question.kind === "scale" && (
-        <div className="surface-sand mt-3 grid grid-cols-5 gap-1 rounded-2xl p-3">
-          {[1, 2, 3, 4, 5].map((n) => {
-            const selected = value === n;
-            return (
-              <button
-                key={n}
-                type="button"
-                aria-pressed={selected}
-                onClick={() => onAnswer(n)}
-                className="flex flex-col items-center gap-1.5 rounded-xl py-1.5"
-              >
-                <span
-                  className={`flex size-6 items-center justify-center rounded-full border transition-colors ${
-                    selected
-                      ? "border-primary bg-primary"
-                      : "border-secondary-foreground/35 bg-transparent"
-                  }`}
-                >
-                  {selected && <span className="size-2 rounded-full bg-accent" />}
-                </span>
-                <span className="text-xs text-secondary-foreground/70">{n}</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {question.kind === "scale" && question.reactions && typeof value === "number" && (
-        <p className="mt-2 text-center text-sm font-medium text-accent-foreground/80">
-          {value <= 2
-            ? question.reactions.low
-            : value >= 4
-              ? question.reactions.high
-              : question.reactions.neutral}
-        </p>
-      )}
-
-      {question.kind === "scale" && question.comment && value !== undefined && (
-        <textarea
-          rows={2}
-          value={typeof comment === "string" ? comment : ""}
-          placeholder={question.comment}
-          onChange={(event) => onComment(event.target.value)}
-          className="surface-sand mt-2 w-full resize-none rounded-2xl p-3 text-sm text-secondary-foreground outline-none placeholder:text-secondary-foreground/45 focus:ring-2 focus:ring-ring"
-        />
-      )}
-
-      {question.kind === "multi" && (
-        <div className="mt-3 space-y-2">
-          {question.options.map((option) => {
-            const selected = selectedList.includes(option);
-            return (
-              <button
-                key={option}
-                type="button"
-                aria-pressed={selected}
-                onClick={() => toggle(option)}
-                className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-sm transition-colors ${
-                  selected
-                    ? "bg-primary text-primary-foreground"
-                    : "surface-sand text-secondary-foreground"
-                }`}
-              >
-                {option}
-                {selected && <Check className="size-4 text-accent" />}
-              </button>
-            );
-          })}
-          <button
-            type="button"
-            onClick={() => onAnswer([])}
-            className={`w-full rounded-2xl px-4 py-3 text-left text-sm transition-colors ${
-              Array.isArray(value) && value.length === 0
-                ? "bg-primary text-primary-foreground"
-                : "border border-secondary-foreground/20 text-muted-foreground"
-            }`}
-          >
-            {question.noneLabel}
-          </button>
-        </div>
-      )}
-
-
-
-      {question.kind === "choice" && (
-        <div className="mt-3 space-y-2">
-          {question.options.map((option) => {
-            const selected = value === option.value;
-            return (
-              <button
-                key={option.value}
-                type="button"
-                aria-pressed={selected}
-                onClick={() => onAnswer(option.value)}
-                className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-sm transition-colors ${
-                  selected
-                    ? "bg-primary text-primary-foreground"
-                    : "surface-sand text-secondary-foreground"
-                }`}
-              >
-                {option.label}
-                {selected && <Check className="size-4 text-accent" />}
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {question.kind === "text" && (
-        <textarea
-          rows={4}
-          value={typeof value === "string" ? value : ""}
-          placeholder={question.placeholder}
-          onChange={(event) => onAnswer(event.target.value)}
-          className="surface-sand mt-3 w-full resize-none rounded-2xl p-4 text-sm text-secondary-foreground outline-none placeholder:text-secondary-foreground/45 focus:ring-2 focus:ring-ring"
-        />
-      )}
-    </fieldset>
-  );
-}
-
-function ThankYou() {
-  return (
-    <div className="reveal flex flex-col items-center py-10 text-center">
-      <img
-        src={mascotBow.url}
-        alt="The Ambassador Seoul bird mascot bowing in thanks"
-        className="w-36"
-      />
-      <h1 className="font-display mt-4 text-3xl text-primary">Thank you</h1>
-      <p className="mt-2 max-w-xs text-sm text-muted-foreground">
-        Your feedback helps us make every stay at The Ambassador Seoul a little more
-        memorable.
-      </p>
-      <img
-        src={logotypeDark.url}
-        alt="The Ambassador Seoul, Pullman Hotels and Resorts"
-        className="mt-10 w-52 opacity-70"
-      />
-    </div>
-  );
-}
-
