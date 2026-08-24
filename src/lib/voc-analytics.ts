@@ -374,3 +374,56 @@ export function aggregatedCsv(rows: ResponseRecord[], weights: Record<string, nu
     out.sort((a, b) => String(a[0]).localeCompare(String(b[0]))),
   );
 }
+
+/** One row per submitted survey — the flat shape for Zoho Analytics. */
+export function responseSummaryCsv(rows: ResponseRecord[]): string {
+  const byResponse = new Map<string, ResponseRecord[]>();
+  for (const r of rows) {
+    if (!byResponse.has(r.response_id)) byResponse.set(r.response_id, []);
+    byResponse.get(r.response_id)!.push(r);
+  }
+  const out: (string | number)[][] = [];
+  for (const [id, group] of byResponse) {
+    const first = group[0]!;
+    const overall = group.find((r) => r.question_id === "q1_overall" || r.question_id === "pc_overall");
+    const staff = group.find((r) => r.question_id === "q2_staff");
+    const issues = group
+      .filter((r) => r.issue_category && !isRecognition(r))
+      .map((r) => r.issue_category as string);
+    const recognition = group.find(isRecognition);
+    const comments = group.map((r) => r.comment).filter(Boolean).join(" | ");
+    out.push([
+      first.created_at,
+      id,
+      first.survey_type,
+      first.touchpoint,
+      first.facility,
+      first.department,
+      first.language ?? "en",
+      overall?.rating ?? "N/A",
+      staff?.rating ?? "N/A",
+      issues.join("; ") || "N/A",
+      overall?.sentiment ?? "N/A",
+      recognition?.staff_recognition ?? "N/A",
+      comments,
+    ]);
+  }
+  return toCsv(
+    [
+      "date",
+      "response_id",
+      "survey_type",
+      "touchpoint",
+      "facility",
+      "department",
+      "language",
+      "overall_rating",
+      "staff_rating",
+      "issue",
+      "sentiment",
+      "staff_recognition",
+      "comment",
+    ],
+    out.sort((a, b) => String(b[0]).localeCompare(String(a[0]))),
+  );
+}
