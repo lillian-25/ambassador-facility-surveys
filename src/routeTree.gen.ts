@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as PostCheckoutRouteImport } from './routes/post-checkout'
+import { Route as SurveyFacilityRouteImport } from './routes/survey.$facility'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,44 @@ const PostCheckoutRoute = PostCheckoutRouteImport.update({
   path: '/post-checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SurveyFacilityRoute = SurveyFacilityRouteImport.update({
+  id: '/survey/$facility',
+  path: '/survey/$facility',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/post-checkout': typeof PostCheckoutRoute
+  '/survey/$facility': typeof SurveyFacilityRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/post-checkout': typeof PostCheckoutRoute
+  '/survey/$facility': typeof SurveyFacilityRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/post-checkout': typeof PostCheckoutRoute
+  '/survey/$facility': typeof SurveyFacilityRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/post-checkout'
+  fullPaths: '/' | '/admin' | '/post-checkout' | '/survey/$facility'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/post-checkout'
-  id: '__root__' | '/' | '/admin' | '/post-checkout'
+  to: '/' | '/admin' | '/post-checkout' | '/survey/$facility'
+  id: '__root__' | '/' | '/admin' | '/post-checkout' | '/survey/$facility'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   PostCheckoutRoute: typeof PostCheckoutRoute
+  SurveyFacilityRoute: typeof SurveyFacilityRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostCheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/survey/$facility': {
+      id: '/survey/$facility'
+      path: '/survey/$facility'
+      fullPath: '/survey/$facility'
+      preLoaderRoute: typeof SurveyFacilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   PostCheckoutRoute: PostCheckoutRoute,
+  SurveyFacilityRoute: SurveyFacilityRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
