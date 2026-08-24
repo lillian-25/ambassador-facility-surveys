@@ -12,6 +12,9 @@ export interface ResponseRecord {
   rating: number | null;
   sentiment: string | null;
   comment: string | null;
+  language?: string | null;
+  issue_category?: string | null;
+  staff_recognition?: string | null;
 }
 
 export interface Filters {
@@ -23,6 +26,8 @@ export interface Filters {
   surveyType: string;
   rating: string;
   issue: string;
+  language: string;
+  sentiment: string;
 }
 
 export const EMPTY_FILTERS: Filters = {
@@ -34,9 +39,13 @@ export const EMPTY_FILTERS: Filters = {
   surveyType: "all",
   rating: "all",
   issue: "all",
+  language: "all",
+  sentiment: "all",
 };
 
-const IMPROVEMENT_QUESTIONS = new Set(["q4_improve", "pc_improve"]);
+const IMPROVEMENT_QUESTIONS = new Set(["q4_improve", "q4_service_recovery", "pc_improve"]);
+const POSITIVE_QUESTIONS = new Set(["q4_positive"]);
+export const isRecognition = (r: ResponseRecord) => r.question_id === "q3_staff_recognition";
 
 export function splitIssues(response: string | null): string[] {
   if (!response) return [];
@@ -60,9 +69,10 @@ export function applyFilters(rows: ResponseRecord[], f: Filters): ResponseRecord
       if (f.rating === "neutral" && r.rating !== 3) return false;
       if (f.rating === "positive" && !(r.rating !== null && r.rating >= 4)) return false;
     }
+    if (f.language !== "all" && (r.language ?? "en") !== f.language) return false;
+    if (f.sentiment !== "all" && (r.sentiment ?? "") !== f.sentiment) return false;
     if (f.issue !== "all") {
-      if (!IMPROVEMENT_QUESTIONS.has(r.question_id)) return false;
-      if (!splitIssues(r.response).includes(f.issue)) return false;
+      if (r.issue_category !== f.issue && !splitIssues(r.response).includes(f.issue)) return false;
     }
     return true;
   });
@@ -80,11 +90,15 @@ export interface Overview {
   totalResponses: number;
   totalAnswers: number;
   avgSatisfaction: number;
+  avgStaffRating: number;
   negativeRate: number;
   byFacility: { facility: string; count: number; avg: number; negativeRate: number }[];
   byDepartment: { department: string; count: number; avg: number }[];
   overTime: { date: string; count: number }[];
   topIssues: { issue: string; count: number }[];
+  topPositives: { issue: string; count: number }[];
+  recognitions: { name: string; note: string; facility: string; date: string }[];
+  comments: { facility: string; date: string; comment: string; sentiment: string }[];
   postCheckoutSatisfaction: number;
   returnIntent: number;
   nps: number;
@@ -101,6 +115,9 @@ export function buildOverview(rows: ResponseRecord[]): Overview {
   const deptSubs = new Map<string, Set<string>>();
   const dayMap = new Map<string, Set<string>>();
   const issueMap = new Map<string, number>();
+  const positiveMap = new Map<string, number>();
+  const recognitions: Overview["recognitions"] = [];
+  const comments: Overview["comments"] = [];
 
   for (const r of rows) {
     if (!facilitySubs.has(r.facility)) facilitySubs.set(r.facility, new Set());
@@ -117,12 +134,36 @@ export function buildOverview(rows: ResponseRecord[]): Overview {
       deptMap.get(r.department)!.push(r.rating);
     }
     if (IMPROVEMENT_QUESTIONS.has(r.question_id)) {
-      for (const issue of splitIssues(r.response)) {
+      for (const issue of splitIssues(r.issue_category ?? r.response)) {
         if (issue.startsWith("Nothing")) continue;
         issueMap.set(issue, (issueMap.get(issue) ?? 0) + 1);
       }
     }
+    if (POSITIVE_QUESTIONS.has(r.question_id)) {
+      for (const issue of splitIssues(r.issue_category ?? r.response)) {
+        positiveMap.set(issue, (positiveMap.get(issue) ?? 0) + 1);
+      }
+    }
+    if (isRecognition(r)) {
+      recognitions.push({
+        name: r.response ?? "Unnamed team member",
+        note: r.comment ?? "",
+        facility: r.facility,
+        date: r.created_at.slice(0, 10),
+      });
+    }
+    if (r.comment && !isRecognition(r)) {
+      comments.push({
+        facility: r.facility,
+        date: r.created_at.slice(0, 10),
+        comment: r.comment,
+        sentiment: r.sentiment ?? "—",
+      });
+    }
   }
+  const staffRatings = rows
+    .filter((r) => r.question_id === "q2_staff" && r.rating !== null)
+    .map((r) => r.rating as number);
 
   const pcOverall = rows.filter((r) => r.question_id === "pc_overall" && r.rating !== null);
   const returns = rows.filter((r) => r.question_id === "pc_return_intent" && r.rating !== null);
@@ -134,6 +175,7 @@ export function buildOverview(rows: ResponseRecord[]): Overview {
     totalResponses: submissions.size,
     totalAnswers: rows.length,
     avgSatisfaction: avg(ratings),
+    avgStaffRating: avg(staffRatings),
     negativeRate: ratings.length ? ratings.filter((n) => n <= 2).length / ratings.length : 0,
     byFacility: [...facilitySubs.entries()]
       .map(([facility, subs]) => {
@@ -159,6 +201,11 @@ export function buildOverview(rows: ResponseRecord[]): Overview {
     topIssues: [...issueMap.entries()]
       .map(([issue, count]) => ({ issue, count }))
       .sort((a, b) => b.count - a.count),
+    topPositives: [...positiveMap.entries()]
+      .map(([issue, count]) => ({ issue, count }))
+      .sort((a, b) => b.count - a.count),
+    recognitions,
+    comments,
     postCheckoutSatisfaction: avg(pcOverall.map((r) => r.rating as number)),
     returnIntent: avg(returns.map((r) => r.rating as number)),
     nps: npsRows.length ? ((promoters - detractors) / npsRows.length) * 100 : 0,
@@ -193,7 +240,7 @@ export function buildPriorityIssues(
   const groups = new Map<string, PriorityIssue>();
   for (const r of rows) {
     if (!IMPROVEMENT_QUESTIONS.has(r.question_id)) continue;
-    for (const issue of splitIssues(r.response)) {
+    for (const issue of splitIssues(r.issue_category ?? r.response)) {
       if (issue.startsWith("Nothing")) continue;
       const key = `${r.facility}|${r.department}|${issue}`;
       const stats = facilityStats.get(r.facility)!;
@@ -251,7 +298,10 @@ export function rawCsv(rows: ResponseRecord[]): string {
       "question_text",
       "response",
       "rating",
+      "issue_category",
       "sentiment",
+      "staff_recognition",
+      "language",
       "comment",
     ],
     rows.map((r) => [
@@ -265,7 +315,10 @@ export function rawCsv(rows: ResponseRecord[]): string {
       r.question_text,
       r.response ?? "N/A",
       r.rating ?? "N/A",
+      r.issue_category ?? "N/A",
       r.sentiment ?? "N/A",
+      r.staff_recognition ?? "N/A",
+      r.language ?? "en",
       r.comment ?? "",
     ]),
   );
@@ -319,5 +372,58 @@ export function aggregatedCsv(rows: ResponseRecord[], weights: Record<string, nu
       "priority_score",
     ],
     out.sort((a, b) => String(a[0]).localeCompare(String(b[0]))),
+  );
+}
+
+/** One row per submitted survey — the flat shape for Zoho Analytics. */
+export function responseSummaryCsv(rows: ResponseRecord[]): string {
+  const byResponse = new Map<string, ResponseRecord[]>();
+  for (const r of rows) {
+    if (!byResponse.has(r.response_id)) byResponse.set(r.response_id, []);
+    byResponse.get(r.response_id)!.push(r);
+  }
+  const out: (string | number)[][] = [];
+  for (const [id, group] of byResponse) {
+    const first = group[0]!;
+    const overall = group.find((r) => r.question_id === "q1_overall" || r.question_id === "pc_overall");
+    const staff = group.find((r) => r.question_id === "q2_staff");
+    const issues = group
+      .filter((r) => r.issue_category && !isRecognition(r))
+      .map((r) => r.issue_category as string);
+    const recognition = group.find(isRecognition);
+    const comments = group.map((r) => r.comment).filter(Boolean).join(" | ");
+    out.push([
+      first.created_at,
+      id,
+      first.survey_type,
+      first.touchpoint,
+      first.facility,
+      first.department,
+      first.language ?? "en",
+      overall?.rating ?? "N/A",
+      staff?.rating ?? "N/A",
+      issues.join("; ") || "N/A",
+      overall?.sentiment ?? "N/A",
+      recognition?.staff_recognition ?? "N/A",
+      comments,
+    ]);
+  }
+  return toCsv(
+    [
+      "date",
+      "response_id",
+      "survey_type",
+      "touchpoint",
+      "facility",
+      "department",
+      "language",
+      "overall_rating",
+      "staff_rating",
+      "issue",
+      "sentiment",
+      "staff_recognition",
+      "comment",
+    ],
+    out.sort((a, b) => String(b[0]).localeCompare(String(a[0]))),
   );
 }

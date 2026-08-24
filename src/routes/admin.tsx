@@ -9,6 +9,7 @@ import {
   downloadCsv,
   EMPTY_FILTERS,
   rawCsv,
+  responseSummaryCsv,
   submissionScope,
   type Filters,
   type ResponseRecord,
@@ -76,6 +77,7 @@ function Admin() {
       [...new Set(rows.map(fn))].filter(Boolean).sort();
     const issues = new Set<string>();
     for (const r of rows) {
+      if (r.issue_category) issues.add(r.issue_category);
       if (r.question_id === "q4_improve" || r.question_id === "pc_improve") {
         for (const i of (r.response ?? "").split(";").map((s) => s.trim()).filter(Boolean))
           issues.add(i);
@@ -86,6 +88,7 @@ function Admin() {
       facilities: uniq((r) => r.facility),
       departments: uniq((r) => r.department),
       surveyTypes: uniq((r) => r.survey_type),
+      languages: uniq((r) => r.language ?? "en"),
       issues: [...issues].sort(),
     };
   }, [rows]);
@@ -131,6 +134,13 @@ function Admin() {
               options={["negative", "neutral", "positive"]}
             />
             <LabeledSelect label="Issue" value={filters.issue} onChange={(v) => set({ issue: v })} options={options.issues} />
+            <LabeledSelect label="Language" value={filters.language} onChange={(v) => set({ language: v })} options={options.languages} />
+            <LabeledSelect
+              label="Sentiment"
+              value={filters.sentiment}
+              onChange={(v) => set({ sentiment: v })}
+              options={["Positive", "Neutral", "Negative"]}
+            />
           </div>
           <button
             type="button"
@@ -145,6 +155,7 @@ function Admin() {
         <section className="grid grid-cols-2 gap-2">
           <Stat label="Total responses" value={String(overview.totalResponses)} />
           <Stat label="Avg satisfaction" value={num(overview.avgSatisfaction)} />
+          <Stat label="Avg staff rating" value={num(overview.avgStaffRating)} />
           <Stat label="Negative response rate" value={pct(overview.negativeRate)} />
           <Stat label="Post-checkout satisfaction" value={num(overview.postCheckoutSatisfaction)} />
           <Stat label="Return intention" value={`${num(overview.returnIntent, 1)}/10`} />
@@ -167,6 +178,36 @@ function Admin() {
 
         <Panel title="Most selected improvement areas">
           <Table head={["Issue", "Mentions"]} rows={overview.topIssues.map((i) => [i.issue, String(i.count)])} />
+        </Panel>
+
+        <Panel title="Most mentioned positive experiences">
+          <Table head={["Highlight", "Mentions"]} rows={overview.topPositives.map((i) => [i.issue, String(i.count)])} />
+        </Panel>
+
+        <Panel title="Staff recognition">
+          <Table
+            head={["Team member", "Facility", "Date", "What stood out"]}
+            rows={overview.recognitions
+              .slice(0, 30)
+              .map((r) => [r.name, r.facility, r.date, r.note || "—"])}
+          />
+        </Panel>
+
+        <Panel title="Guest comments">
+          <div className="space-y-3">
+            {overview.comments.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No comments yet.</p>
+            ) : (
+              overview.comments.slice(0, 40).map((c, i) => (
+                <div key={i} className="surface-sand rounded-2xl px-4 py-3">
+                  <p className="text-[0.65rem] uppercase tracking-[0.14em] text-muted-foreground">
+                    {c.facility} · {c.date} · {c.sentiment}
+                  </p>
+                  <p className="mt-1 text-[0.85rem] text-card-foreground">{c.comment}</p>
+                </div>
+              ))
+            )}
+          </div>
         </Panel>
 
         <Panel title="Responses over time">
@@ -217,13 +258,20 @@ function Admin() {
       </div>
 
       <div className="fixed inset-x-0 bottom-0 border-t border-border bg-card px-5 py-3">
-        <div className="mx-auto flex max-w-3xl gap-2">
+        <div className="mx-auto flex max-w-3xl flex-wrap gap-2">
           <button
             type="button"
             onClick={() => downloadCsv(`ambassador-voc-raw-${stamp}.csv`, rawCsv(applyFilters(rows, filters)))}
             className="flex-1 rounded-full bg-primary px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-primary-foreground"
           >
             Export CSV
+          </button>
+          <button
+            type="button"
+            onClick={() => downloadCsv(`ambassador-voc-responses-${stamp}.csv`, responseSummaryCsv(filtered))}
+            className="flex-1 rounded-full border border-primary px-4 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-primary"
+          >
+            Per-response CSV
           </button>
           <button
             type="button"

@@ -39,12 +39,15 @@ export type Database = {
           department: string
           facility: string
           id: string
+          issue_category: string | null
+          language: string
           question_id: string
           question_text: string
           rating: number | null
           response: string | null
           response_id: string
           sentiment: string | null
+          staff_recognition: string | null
           survey_type: string
           touchpoint: string
         }
@@ -54,12 +57,15 @@ export type Database = {
           department: string
           facility: string
           id?: string
+          issue_category?: string | null
+          language?: string
           question_id: string
           question_text: string
           rating?: number | null
           response?: string | null
           response_id: string
           sentiment?: string | null
+          staff_recognition?: string | null
           survey_type: string
           touchpoint: string
         }
@@ -69,12 +75,15 @@ export type Database = {
           department?: string
           facility?: string
           id?: string
+          issue_category?: string | null
+          language?: string
           question_id?: string
           question_text?: string
           rating?: number | null
           response?: string | null
           response_id?: string
           sentiment?: string | null
+          staff_recognition?: string | null
           survey_type?: string
           touchpoint?: string
         }

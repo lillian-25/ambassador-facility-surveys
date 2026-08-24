@@ -64,7 +64,7 @@ function Hub() {
           {others.map((f) => (
             <Link
               key={f.slug}
-              to="/s/$facility"
+              to="/survey/$facility"
               params={{ facility: f.slug }}
               className="surface-sand flex items-center justify-between rounded-2xl px-4 py-3.5"
             >
@@ -81,7 +81,7 @@ function Hub() {
           {dining.map((f) => (
             <Link
               key={f.slug}
-              to="/s/$facility"
+              to="/survey/$facility"
               params={{ facility: f.slug }}
               className="surface-sand flex items-center justify-between rounded-2xl px-4 py-3.5"
             >
