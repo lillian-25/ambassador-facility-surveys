@@ -12,6 +12,9 @@ export interface ResponseRow {
   rating: number | null;
   sentiment: string | null;
   comment: string | null;
+  language?: string;
+  issue_category?: string | null;
+  staff_recognition?: string | null;
 }
 
 export function newResponseId(): string {
@@ -20,6 +23,7 @@ export function newResponseId(): string {
 }
 
 export async function submitResponses(rows: ResponseRow[]): Promise<void> {
-  const { error } = await supabase.from("survey_responses").insert(rows);
+  const withDefaults = rows.map((r) => ({ language: "en", ...r }));
+  const { error } = await supabase.from("survey_responses").insert(withDefaults);
   if (error) throw new Error(error.message);
 }

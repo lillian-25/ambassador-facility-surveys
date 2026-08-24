@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as PostCheckoutRouteImport } from './routes/post-checkout'
-import { Route as SFacilityRouteImport } from './routes/s.$facility'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,44 +28,35 @@ const PostCheckoutRoute = PostCheckoutRouteImport.update({
   path: '/post-checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SFacilityRoute = SFacilityRouteImport.update({
-  id: '/s/$facility',
-  path: '/s/$facility',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/post-checkout': typeof PostCheckoutRoute
-  '/s/$facility': typeof SFacilityRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/post-checkout': typeof PostCheckoutRoute
-  '/s/$facility': typeof SFacilityRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/post-checkout': typeof PostCheckoutRoute
-  '/s/$facility': typeof SFacilityRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/post-checkout' | '/s/$facility'
+  fullPaths: '/' | '/admin' | '/post-checkout'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/post-checkout' | '/s/$facility'
-  id: '__root__' | '/' | '/admin' | '/post-checkout' | '/s/$facility'
+  to: '/' | '/admin' | '/post-checkout'
+  id: '__root__' | '/' | '/admin' | '/post-checkout'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   PostCheckoutRoute: typeof PostCheckoutRoute
-  SFacilityRoute: typeof SFacilityRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -92,13 +82,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostCheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/s/$facility': {
-      id: '/s/$facility'
-      path: '/s/$facility'
-      fullPath: '/s/$facility'
-      preLoaderRoute: typeof SFacilityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -106,7 +89,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   PostCheckoutRoute: PostCheckoutRoute,
-  SFacilityRoute: SFacilityRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
